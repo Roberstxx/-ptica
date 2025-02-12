@@ -106,12 +106,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion'])) {
     }
 
     if ($_POST['accion'] == "registrar_venta") {
+        $id_cliente = $_POST['id_cliente'];
+        $id_sucursal = $_POST['id_sucursal'];
+        $monto_total = $_POST['monto_total'];
+        $tipo_lente = $_POST['tipo_lente']; // El nombre del lente
+    
+        // Insertar la venta en la tabla Venta
         $sql = "INSERT INTO Venta (id_cliente, id_sucursal, monto_total, estado_pago) 
-                VALUES ('{$_POST['id_cliente']}', '{$_POST['id_sucursal']}', '{$_POST['monto_total']}', 'Pendiente')";
+                VALUES ('$id_cliente', '$id_sucursal', '$monto_total', 'Pendiente')";
         
         if ($conn->query($sql) === TRUE) {
-            $id_venta = $conn->insert_id;
-            echo "Venta registrada con éxito. Número de comprobante: <a href='comprobante.php?id_venta=$id_venta' target='_blank'>$id_venta</a>";
+            $id_venta = $conn->insert_id; // Obtiene el ID de la venta recién insertada
+            
+            // 🔹 Convertir el nombre del lente en su id_lente antes de insertar en detalle_venta
+            $query = "SELECT id_lente FROM lente WHERE tipo = '$tipo_lente'";
+
+            $result = $conn->query($query);
+    
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $id_lente = $row['id_lente'];
+    
+                // Insertar en detalle_venta con el ID del lente correcto
+                $sql_detalle = "INSERT INTO detalle_venta (id_venta, id_lente) 
+                                VALUES ('$id_venta', '$id_lente')";
+    
+                if ($conn->query($sql_detalle) === TRUE) {
+                    echo "Venta registrada con éxito. Número de comprobante: 
+                          <a href='comprobante.php?id_venta=$id_venta' target='_blank'>$id_venta</a>";
+                } else {
+                    echo "❌ Error al insertar en detalle de ventas: " . $conn->error;
+                }
+            } else {
+                echo "❌ Error: El tipo de lente seleccionado no existe en la base de datos.";
+            }
+        } else {
+            echo "❌ Error al registrar venta: " . $conn->error;
         }
     }
 
