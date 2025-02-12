@@ -19,19 +19,21 @@ if (isset($_GET['seccion'])) {
 
     if ($seccion == "registrar_venta") {
         echo '<h2>Registrar Venta</h2>
-        <form action="funciones.php" method="POST">
-            <input type="hidden" name="accion" value="registrar_venta">
-            <input type="number" name="id_cliente" placeholder="ID Cliente" required>
-            <input type="number" name="id_sucursal" placeholder="ID Sucursal" required>
-            <input type="number" name="monto_total" placeholder="Monto Total" required>
-            <label for="tipo_lente">Tipo de Lente:</label>
-            <select name="tipo_lente" required>
-                <option value="Oftálmicos">Oftálmicos</option>
-                <option value="Solares">Solares</option>
-                <option value="De contacto">De contacto</option>
-            </select>
-            <button type="submit">Registrar Venta</button>
-        </form>';
+<form action="funciones.php" method="POST">
+    <input type="hidden" name="accion" value="registrar_venta">
+    <input type="number" name="id_cliente" placeholder="ID Cliente" required>
+    <input type="number" name="id_sucursal" placeholder="ID Sucursal" required>
+    <input type="number" name="monto_total" placeholder="Monto Total" required>
+    <label for="tipo_lente">Tipo de Lente:</label>
+    <select name="tipo_lente" required>
+        <option value="Oftálmico">Oftálmicos</option>
+        <option value="Solar">Solares</option>
+        <option value="Contacto">De contacto</option>
+    </select>
+    <input type="number" name="cantidad" placeholder="Cantidad" value="1" required>
+    <input type="number" name="subtotal" placeholder="Subtotal" required>
+    <button type="submit">Registrar Venta</button>
+</form>';
     }
 
     if ($seccion == "registrar_pago") {
@@ -109,41 +111,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion'])) {
         $id_cliente = $_POST['id_cliente'];
         $id_sucursal = $_POST['id_sucursal'];
         $monto_total = $_POST['monto_total'];
-        $tipo_lente = $_POST['tipo_lente']; // El nombre del lente
+        $tipo_lente = $_POST['tipo_lente'];
+          // Obtener la cantidad y el subtotal del formulario
+    $cantidad = $_POST['cantidad'];
+    $subtotal = $_POST['subtotal'];
     
         // Insertar la venta en la tabla Venta
         $sql = "INSERT INTO Venta (id_cliente, id_sucursal, monto_total, estado_pago) 
                 VALUES ('$id_cliente', '$id_sucursal', '$monto_total', 'Pendiente')";
-        
+    
         if ($conn->query($sql) === TRUE) {
-            $id_venta = $conn->insert_id; // Obtiene el ID de la venta recién insertada
-        
-            
-            // 🔹 Convertir el nombre del lente en su id_lente antes de insertar en detalle_venta
+            $id_venta = $conn->insert_id;
+    
+            // Obtener el id_lente correspondiente al tipo_lente
             $query = "SELECT id_lente FROM lente WHERE tipo = '$tipo_lente'";
-
             $result = $conn->query($query);
     
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
                 $id_lente = $row['id_lente'];
     
-               // Insertar en detalle_venta con el ID del lente correcto Y EL ID DE LA VENTA
-    $sql_detalle = "INSERT INTO detalle_venta (id_venta, id_lente) 
-    VALUES ('$id_venta', '$id_lente')"; // ⬅️ Aquí se incluye $id_venta
+                // Insertar en detalle_venta con el ID del lente, ID de venta, cantidad y subtotal
+                $cantidad = 1; //  Valor por defecto para cantidad
+                $subtotal = $monto_total; // Valor por defecto para subtotal (puedes cambiarlo)
+    
+                $sql_detalle = "INSERT INTO detalle_venta (id_venta, id_lente, cantidad, subtotal) 
+                    VALUES ('$id_venta', '$id_lente', '$cantidad', '$subtotal')";
     
                 if ($conn->query($sql_detalle) === TRUE) {
                     echo "Venta registrada con éxito. Número de comprobante: 
                           <a href='comprobante.php?id_venta=$id_venta' target='_blank'>$id_venta</a>";
                 } else {
-                    echo "❌ Error al insertar en detalle de ventas: " . $conn->error;
+                    echo "❌ Error al insertar en detalle de ventas: ". $conn->error;
                 }
             } else {
-                echo "✅ Venta registrada con éxito. Número de comprobante: 
-                      <a href='comprobante.php?id_venta=$id_venta' target='_blank'>$id_venta</a>";
+                echo "❌ Error: No se encontró el lente seleccionado.";
             }
         } else {
-            echo "❌ Error al registrar venta: " . $conn->error;
+            echo "❌ Error al registrar venta: ". $conn->error;
         }
     }
 
