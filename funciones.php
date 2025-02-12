@@ -117,6 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion'])) {
         
         if ($conn->query($sql) === TRUE) {
             $id_venta = $conn->insert_id; // Obtiene el ID de la venta recién insertada
+        
             
             // 🔹 Convertir el nombre del lente en su id_lente antes de insertar en detalle_venta
             $query = "SELECT id_lente FROM lente WHERE tipo = '$tipo_lente'";
@@ -127,9 +128,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion'])) {
                 $row = $result->fetch_assoc();
                 $id_lente = $row['id_lente'];
     
-                // Insertar en detalle_venta con el ID del lente correcto
-                $sql_detalle = "INSERT INTO detalle_venta (id_venta, id_lente) 
-                                VALUES ('$id_venta', '$id_lente')";
+               // Insertar en detalle_venta con el ID del lente correcto Y EL ID DE LA VENTA
+    $sql_detalle = "INSERT INTO detalle_venta (id_venta, id_lente) 
+    VALUES ('$id_venta', '$id_lente')"; // ⬅️ Aquí se incluye $id_venta
     
                 if ($conn->query($sql_detalle) === TRUE) {
                     echo "Venta registrada con éxito. Número de comprobante: 
