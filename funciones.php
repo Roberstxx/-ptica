@@ -4,17 +4,47 @@ include 'conexion.php';
 if (isset($_GET['seccion'])) {
     $seccion = $_GET['seccion'];
 
-    if ($seccion == "registrar_cliente") {
-        echo '<h2>Registrar Cliente</h2>
-        <form action="funciones.php" method="POST">
-            <input type="hidden" name="accion" value="registrar_cliente">
-            <input type="text" name="nombre" placeholder="Nombre" required>
-            <input type="text" name="apellido" placeholder="Apellido" required>
-            <input type="date" name="fecha_nacimiento" required>
-            <input type="text" name="telefono" placeholder="Teléfono">
-            <input type="email" name="correo" placeholder="Correo">
-            <button type="submit">Registrar</button>
+    if (isset($_GET['seccion'])) {
+        $seccion = $_GET['seccion'];
+    
+        if ($seccion == "registrar_cliente") {
+            echo '<h2>Registrar Cliente</h2>
+            <form action="funciones.php" method="POST">
+                <input type="hidden" name="accion" value="registrar_cliente">
+                <input type="text" name="nombre" placeholder="Nombre" required>
+                <input type="text" name="apellido" placeholder="Apellido" required>
+                <input type="date" name="fecha_nacimiento" required>
+                <input type="text" name="telefono" placeholder="Teléfono">
+                <input type="email" name="correo" placeholder="Correo">
+                <button type="submit">Registrar</button>
+            </form>';
+        }
+    
+        if ($seccion == "registrar_venta") {
+            echo '<h2>Registrar Venta</h2>
+            <form action="funciones.php" method="POST">
+                <input type="hidden" name="accion" value="registrar_venta">
+                <input type="number" name="id_cliente" placeholder="ID Cliente" required>
+                <input type="number" name="id_sucursal" placeholder="ID Sucursal" required>
+                <input type="number" name="monto_total" placeholder="Monto Total" required>
+                <label for="tipo_lente">Tipo de Lente:</label>
+                <select name="tipo_lente" required>
+                <option value="Oftálmicos">Oftálmicos</option>
+                <option value="Solares">Solares</option>
+                <option value="De contacto">De contacto</option>
+            </select>
+            <button type="submit">Registrar Venta</button>
         </form>';
+                
+    
+            $result = $conn->query("SELECT DISTINCT tipo FROM Lentes");
+            while ($row = $result->fetch_assoc()) {
+                echo '<option value="'.$row["tipo"].'">'.$row["tipo"].'</option>';
+            }
+            
+            echo '</select>
+                <button type="submit">Registrar Venta</button>
+            </form>';
     }
 
     if ($seccion == "registrar_venta") {
@@ -133,5 +163,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion'])) {
         echo "Error: " . $conn->error;
     }
     $conn->close();
+}
 }
 ?>
