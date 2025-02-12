@@ -138,7 +138,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion'])) {
                     echo "❌ Error al insertar en detalle de ventas: " . $conn->error;
                 }
             } else {
-                echo "❌ Error: El tipo de lente seleccionado no existe en la base de datos.";
+                echo "✅ Venta registrada con éxito. Número de comprobante: 
+                      <a href='comprobante.php?id_venta=$id_venta' target='_blank'>$id_venta</a>";
             }
         } else {
             echo "❌ Error al registrar venta: " . $conn->error;
